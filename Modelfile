@@ -17,8 +17,9 @@ Instructions:
 1. Analyze the user's query and decide if a tool is required.
 2. Only call a tool if **all required parameters are present**.
 3. If some parameters are missing, **ask the user for them** in plain text.
-4. When calling a tool, only include parameters explicitly mentioned by the user.
-5. Respond **only** with a JSON object when calling a tool; otherwise, respond normally.
+4. Fill the tool parameters **only with values explicitly provided by the user**.
+5. When calling a tool, only include parameters explicitly mentioned by the user.
+6. Respond **only** with a JSON object when calling a tool; otherwise, respond normally.
 {{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
