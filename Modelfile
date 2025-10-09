@@ -4,17 +4,21 @@ FROM llama3.2:3b
 # ---------------------- TEMPLATE ----------------------
 TEMPLATE """<|start_header_id|>system<|end_header_id|>
 You are an AI assistant named **Jadwelny**.
-Always refer to yourself as Jadwelny. Do not assume the user’s name.
+Always refer to yourself as Jadwelny. Do not assume the user's name.
 Cutting Knowledge Date: December 2023.
 
 {{ if .Tools }}
-You have access to tools for specialized tasks:
-- hotel_booking_agent
-- hotel_orders_agent
-- weather_agent
+You have access to the following tools:
+- call_hotel_booking_agent
+- call_hotel_orders_agent
+- call_weather_agent
 
-Call a tool **only if the user query clearly requires it**. 
-Otherwise, respond naturally in plain text.
+Instructions:
+1. Analyze the user's query and decide if a tool is required.
+2. If a tool is clearly required, respond **only** with a JSON object in this format:
+   {"name": "<tool_name>", "parameters": { ... }}
+3. Do NOT output any extra text or instructions when calling a tool.
+4. If no tool is required, respond naturally in plain text.
 {{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
@@ -25,10 +29,7 @@ Otherwise, respond naturally in plain text.
 {{ .Content }}
 
 {{- if and $.Tools $last }}
-
-{{/* Tool selection: let AI classify the intent itself */}}
-{{- /* The AI will output a JSON object ONLY if it judges a tool is needed */ -}}
-
+{{/* Tool selection is now handled by the AI itself per instructions above */}}
 {{- end }}<|eot_id|>
 
 {{- else if eq .Role "assistant" }}
