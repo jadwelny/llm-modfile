@@ -1,18 +1,21 @@
-# Base model (replace this with your desired model)
+# Base model (replace with your desired version)
 FROM llama3.2:3b
 
 # ---------------------- TEMPLATE ----------------------
 TEMPLATE """<|start_header_id|>system<|end_header_id|>
-You are a helpful AI assistant called **Jadwelny**.
-
-Cutting Knowledge Date: December 2023
-
-{{ if .System }}{{ .System }}{{ end }}
+You are an AI assistant named **Jadwelny**.
+Always refer to yourself as Jadwelny. Do not assume the user’s name.
+Cutting Knowledge Date: December 2023.
 
 {{ if .Tools }}
-When you receive a tool call response, use the result to respond clearly and directly to the user.
-{{ end }}
-<|eot_id|>
+You have access to the following tools:
+- **hotel_booking_agent**: handles hotel booking, searching, modifying, or cancelling reservations.
+- **hotel_orders_agent**: handles existing bookings, room service, or hotel orders.
+- **weather_agent**: provides weather information for a location/date.
+
+Only call a tool if the user explicitly asks for its functionality. 
+Otherwise, respond naturally in plain text.
+{{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
 {{- $last := eq (len (slice $.Messages $i)) 1 }}
@@ -23,19 +26,14 @@ When you receive a tool call response, use the result to respond clearly and dir
 
 {{- if and $.Tools $last }}
 
-Decide whether this message requires using one of the available tools.
-
-Rules for tool usage:
-- Only call a tool if the user explicitly asks for or clearly implies an action matching its purpose.
-  - **hotel_booking_agent** → when user asks to *search, book, modify, or cancel* a hotel.
-  - **hotel_orders_agent** → when user asks about *existing reservations or room services*.
-  - **weather_agent** → when user asks for *weather info* for a location or date.
-- If none of these apply, **do not call any tool** — just reply normally.
-
-If a tool is needed, respond **only** with a JSON object:
-{"name": "<tool_name>", "parameters": { ... }}
-
-Otherwise, reply in plain text as a normal assistant.
+{{/* Tool selection logic */}}
+{{ if (or (contains .Content "book") (contains .Content "reservation") (contains .Content "hotel")) }}
+{"name": "call_hotel_booking_agent", "parameters": {}}
+{{ else if (or (contains .Content "room service") (contains .Content "order") (contains .Content "booking status")) }}
+{"name": "call_hotel_orders_agent", "parameters": {}}
+{{ else if (or (contains .Content "weather") (contains .Content "temperature") (contains .Content "forecast")) }}
+{"name": "call_weather_agent", "parameters": {}}
+{{ end }}
 
 {{- end }}<|eot_id|>
 
@@ -46,7 +44,7 @@ Otherwise, reply in plain text as a normal assistant.
 {{- else if eq .Role "tool" }}
 <|start_header_id|>ipython<|end_header_id|>
 {{ .Content }}<|eot_id|>
-{{ if $last }}<|start_header_id|>assistant<|end_header_id|>{{ end }}
+{{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
 {{- end }}
 {{- end }}
 """
