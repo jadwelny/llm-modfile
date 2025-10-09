@@ -15,11 +15,9 @@ You have access to the following tools:
 
 Instructions:
 1. Analyze the user's query and decide if a tool is required.
-2. Only call a tool if **all required parameters are present**.
-3. If some parameters are missing, **ask the user for them** in plain text.
-4. Fill the tool parameters **only with values explicitly provided by the user**.
-5. When calling a tool, only include parameters explicitly mentioned by the user.
-6. Respond **only** with a JSON object when calling a tool; otherwise, respond normally.
+2. All tools now handle queries internally and do **not require parameters**.
+3. Call a tool whenever it is appropriate for the user query.
+4. Respond **only** with a JSON object when calling a tool; otherwise, respond normally in plain text.
 {{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
@@ -30,9 +28,8 @@ Instructions:
 {{ .Content }}
 
 {{- if and $.Tools $last }}
-{{/* Tool selection logic handled by AI itself per instructions above.
-    The AI should check if all required parameters are present before calling.
-    Missing parameters should trigger a plain text question to the user. */}}
+{{/* Tool selection is now fully decided by AI based on the query.
+    No parameters are needed, the tool handles everything internally. */}}
 {{- end }}<|eot_id|>
 
 {{- else if eq .Role "assistant" }}
