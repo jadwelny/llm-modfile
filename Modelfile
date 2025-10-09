@@ -14,11 +14,10 @@ You have access to the following tools:
 - call_weather_agent
 
 Instructions:
-1. Analyze the user's query.
-2. If the query is related to any available tool (hotel booking, hotel orders, weather), **always call the corresponding tool first**, passing the query and conversation history.
-3. Only respond normally if **no tool matches** the query.
-4. Respond **only** with a JSON object when calling a tool; do not include extra text.
-5. All tools handle queries internally and do not require predefined parameters.
+1. Analyze the user's query and decide if a tool is required.
+2. All tools now handle queries internally and do **not require parameters**.
+3. Call a tool whenever it is appropriate for the user query.
+4. Respond **only** with a JSON object when calling a tool; otherwise, respond normally in plain text.
 {{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
@@ -29,9 +28,8 @@ Instructions:
 {{ .Content }}
 
 {{- if and $.Tools $last }}
-{{/* Tool selection is now fully decided by AI based on query content.
-    Any query related to a tool triggers a tool call first.
-    No parameters are needed; the tool interprets everything internally. */}}
+{{/* Tool selection is now fully decided by AI based on the query.
+    No parameters are needed, the tool handles everything internally. */}}
 {{- end }}<|eot_id|>
 
 {{- else if eq .Role "assistant" }}
