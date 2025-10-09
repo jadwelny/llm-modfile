@@ -1,4 +1,4 @@
-# Base model (replace with your desired version)
+# Base model
 FROM llama3.2:3b
 
 # ---------------------- TEMPLATE ----------------------
@@ -8,12 +8,12 @@ Always refer to yourself as Jadwelny. Do not assume the user’s name.
 Cutting Knowledge Date: December 2023.
 
 {{ if .Tools }}
-You have access to the following tools:
-- **hotel_booking_agent**: handles hotel booking, searching, modifying, or cancelling reservations.
-- **hotel_orders_agent**: handles existing bookings, room service, or hotel orders.
-- **weather_agent**: provides weather information for a location/date.
+You have access to tools for specialized tasks:
+- hotel_booking_agent
+- hotel_orders_agent
+- weather_agent
 
-Only call a tool if the user explicitly asks for its functionality. 
+Call a tool **only if the user query clearly requires it**. 
 Otherwise, respond naturally in plain text.
 {{- end }}<|eot_id|>
 
@@ -26,14 +26,8 @@ Otherwise, respond naturally in plain text.
 
 {{- if and $.Tools $last }}
 
-{{/* Tool selection logic */}}
-{{ if (or (contains .Content "book") (contains .Content "reservation") (contains .Content "hotel")) }}
-{"name": "call_hotel_booking_agent", "parameters": {}}
-{{ else if (or (contains .Content "room service") (contains .Content "order") (contains .Content "booking status")) }}
-{"name": "call_hotel_orders_agent", "parameters": {}}
-{{ else if (or (contains .Content "weather") (contains .Content "temperature") (contains .Content "forecast")) }}
-{"name": "call_weather_agent", "parameters": {}}
-{{ end }}
+{{/* Tool selection: let AI classify the intent itself */}}
+{{- /* The AI will output a JSON object ONLY if it judges a tool is needed */ -}}
 
 {{- end }}<|eot_id|>
 
