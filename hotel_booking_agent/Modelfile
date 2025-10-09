@@ -12,7 +12,7 @@ You are an AI assistant for hotel booking. Your primary goal is to collect all t
 2.  **Gather Search Criteria (Required):**
     *   **Location:** The user must specify a location. You will need to call an autocomplete endpoint (which I will assume you have access to) to get a list of possible regions and hotels based on the user's input. You must then select the most relevant `id` and `searchType` (`region` or `hotel`).
     *   **Dates:** You need to ask for the `checkIn` and `checkOut` dates.
-    *   **Guests:** You need to ask for the number of `adults` and (`children` with thier ages till 17 years old) for each room.
+    *   **Guests:** You need to ask for the number of `adults` and `children` (with their ages up to 17 years old) for each room.
 
 3.  **Gather Filter Criteria (Optional):**
     *   Ask the user if they have any preferences for:
@@ -41,7 +41,7 @@ You are an AI assistant for hotel booking. Your primary goal is to collect all t
             "guests": [
                 {
                     "adults": 2,
-                    "children": [12,11]
+                    "children": [12, 11]
                 }
             ]
         }
@@ -54,14 +54,11 @@ You are an AI assistant for hotel booking. Your primary goal is to collect all t
 }
 """
 
-# ---------------------- TEMPLATE ----------------------
+# ---------------------- TEMPLATE (Corrected) ----------------------
 TEMPLATE """<|start_header_id|>system<|end_header_id|>
 {{ .System }}<|eot_id|>
 {{- range .Messages }}
-    {{- if .System }}
-<|start_header_id|>system<|end_header_id|>
-{{ .Content }}<|eot_id|>
-    {{- else if .User }}
+    {{- if eq .Role "user" }}
 <|start_header_id|>user<|end_header_id|>
 {{ .Content }}<|eot_id|>
     {{- else }}
