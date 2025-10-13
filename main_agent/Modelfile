@@ -1,54 +1,45 @@
-# Base model
-FROM llama3.2:3b
+# ---------------------- BASE MODEL ----------------------
+# Using the 8B parameter model is recommended for better and more reliable tool-use capabilities.
+# The 3B model may work but can be less consistent.
+FROM llama3.2:8b
 
 # ---------------------- TEMPLATE ----------------------
-TEMPLATE """<|start_header_id|>system<|end_header_id|>
-You are an AI assistant named **Jadwelny**.
+# This template uses the official Llama 3.2 syntax for tool calling.
+# It instructs the model on how to structure its thoughts and when to call tools.
+TEMPLATE """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+You are an AI assistant named Jadwelny.
 Always refer to yourself as Jadwelny. Do not assume the user's name.
 Cutting Knowledge Date: December 2023.
 
-{{ if .Tools }}
-You have access to the following tools:
-- call_hotel_booking_agent
-- call_hotel_orders_agent
-- call_weather_agent
+You have access to the following tools. Use them when necessary.
+<tools>
+{{- range .Tools }}
+{"type": "function", "function": {"name": "{{ .Name }}", "description": "{{ .Description }}", "parameters": {"type": "object", "properties": {}}}}
+{{- end }}
+</tools><|eot_id|>
 
-Instructions:
-1. Analyze the user's query and decide if a tool is required.
-2. If a tool is clearly required, respond **only** with a JSON object in this format:
-   {"name": "<tool_name>"}
-3. Do NOT include any 'parameters' field in the JSON object when calling a tool.
-4. Do NOT output any extra text or instructions when calling a tool.
-5. If no tool is required, respond naturally in plain text.
-{{- end }}<|eot_id|>
-
-{{- range $i, $_ := .Messages }}
-{{- $last := eq (len (slice $.Messages $i)) 1 }}
-
+{{- range .Messages }}
 {{- if eq .Role "user" }}
 <|start_header_id|>user<|end_header_id|>
-{{ .Content }}
-
-{{- if and $.Tools $last }}
-{{/* Tool selection is now handled by the AI itself per instructions above */}}
-{{- end }}<|eot_id|>
-
+{{ .Content }}<|eot_id|>
 {{- else if eq .Role "assistant" }}
 <|start_header_id|>assistant<|end_header_id|>
-{{ .Content }}{{ if not $last }}<|eot_id|>{{ end }}
-
-{{- else if eq .Role "tool" }}
-<|start_header_id|>ipython<|end_header_id|>
 {{ .Content }}<|eot_id|>
-{{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
 {{- end }}
 {{- end }}
+
+<|start_header_id|>assistant<|end_header_id|>
 """
 
 # ---------------------- PARAMETERS ----------------------
+# These are special tokens that tell the model when to stop generating text.
+# They are crucial for ensuring the output is correctly formatted, especially for tool calls.
 PARAMETER stop <|start_header_id|>
 PARAMETER stop <|end_header_id|>
 PARAMETER stop <|eot_id|>
+# This special token is used by Llama 3.2 to signal the end of a tool call block.
+PARAMETER stop <|reserved_special_token_250|>
 
 # ---------------------- LICENSE ----------------------
+# It's good practice to keep the license information of the base model.
 LICENSE "Llama 3.2 Community License – see https://www.llama.com/llama3_2/use-policy"
