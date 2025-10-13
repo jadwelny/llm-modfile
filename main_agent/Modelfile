@@ -17,7 +17,7 @@ Instructions:
 1. Analyze the user's query and decide if a tool is required.
 2. If a tool is clearly required, respond **only** with a JSON object in this format:
    {"name": "<tool_name>"}
-3. Do NOT pass any parameters with the tool call.
+3. Do NOT include any 'parameters' field in the JSON object when calling a tool.
 4. Do NOT output any extra text or instructions when calling a tool.
 5. If no tool is required, respond naturally in plain text.
 {{- end }}<|eot_id|>
@@ -41,6 +41,7 @@ Instructions:
 <|start_header_id|>ipython<|end_header_id|>
 {{ .Content }}<|eot_id|>
 {{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
+{{- end }}
 {{- end }}
 """
 
