@@ -1,6 +1,3 @@
-# ---------------------- BASE MODEL ----------------------
-# Using the 8B parameter model is recommended for better and more reliable tool-use capabilities.
-# The 3B model may work but can be less consistent.
 FROM llama3.2:8b
 
 # ---------------------- TEMPLATE ----------------------
