@@ -42,6 +42,7 @@ Instructions:
 {{ .Content }}<|eot_id|>
 {{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
 {{- end }}
+{{- end }}
 """
 
 # ---------------------- PARAMETERS ----------------------
