@@ -1,56 +1,54 @@
-model:
-  # Base model
-  FROM: llama3.2:3b
+# Base model
+FROM llama3.2:3b
 
-  # ---------------------- TEMPLATE ----------------------
-  TEMPLATE: |
-    <|start_header_id|>system<|end_header_id|>
-    You are an AI assistant named **Jadwelny**.
-    Always refer to yourself as Jadwelny. Do not assume the user's name.
-    Cutting Knowledge Date: December 2023.
+# ---------------------- TEMPLATE ----------------------
+TEMPLATE """<|start_header_id|>system<|end_header_id|>
+You are an AI assistant named **Jadwelny**.
+Always refer to yourself as Jadwelny. Do not assume the user's name.
+Cutting Knowledge Date: December 2023.
 
-    {{ if .Tools }}
-    You have access to the following tools:
-    - call_hotel_booking_agent
-    - call_hotel_orders_agent
-    - call_weather_agent
+{{ if .Tools }}
+You have access to the following tools:
+- call_hotel_booking_agent
+- call_hotel_orders_agent
+- call_weather_agent
 
-    Instructions:
-    1. Analyze the user's query and decide if a tool is required.
-    2. If a tool is clearly required, respond **only** with a JSON object in this format:
-       {"name": "<tool_name>", "parameters": { ... }}
-    3. Do NOT output any extra text or instructions when calling a tool.
-    4. If no tool is required, respond naturally in plain text.
-    {{- end }}<|eot_id|>
+Instructions:
+1. Analyze the user's query and decide if a tool is required.
+2. If a tool is clearly required, respond **only** with a JSON object in this format:
+  {"name": "<tool_name>", "parameters": { ... }}
+3. Do NOT output any extra text or instructions when calling a tool.
+4. If no tool is required, respond naturally in plain text.
+5. Always reply in the same language as the last user message: if the last message is in Arabic, reply in Arabic; if in English, reply in English.
+{{- end }}<|eot_id|>
 
-    {{- range $i, $_ := .Messages }}
-    {{- $last := eq (len (slice $.Messages $i)) 1 }}
+{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1 }}
 
-    {{- if eq .Role "user" }}
-    <|start_header_id|>user<|end_header_id|>
-    {{ .Content }}
+{{- if eq .Role "user" }}
+<|start_header_id|>user<|end_header_id|>
+{{ .Content }}
 
-    {{- if and $.Tools $last }}
-    {{/* Tool selection is now handled by the AI itself per instructions above */}}
-    {{- end }}<|eot_id|>
+{{- if and $.Tools $last }}
+{{/* Tool selection is now handled by the AI itself per instructions above */}}
+{{- end }}<|eot_id|>
 
-    {{- else if eq .Role "assistant" }}
-    <|start_header_id|>assistant<|end_header_id|>
-    {{ .Content }}{{ if not $last }}<|eot_id|>{{ end }}
+{{- else if eq .Role "assistant" }}
+<|start_header_id|>assistant<|end_header_id|>
+{{ .Content }}{{ if not $last }}<|eot_id|>{{ end }}
 
-    {{- else if eq .Role "tool" }}
-    <|start_header_id|>ipython<|end_header_id|>
-    {{ .Content }}<|eot_id|>
-    {{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
-    {{- end }}
-    {{- end }}
+{{- else if eq .Role "tool" }}
+<|start_header_id|>ipython<|end_header_id|>
+{{ .Content }}<|eot_id|>
+{{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
+{{- end }}
+{{- end }}
+"""
 
-  # ---------------------- PARAMETERS ----------------------
-  PARAMETERS:
-    stop:
-      - "<|start_header_id|>"
-      - "<|end_header_id|>"
-      - "<|eot_id|>"
+# ---------------------- PARAMETERS ----------------------
+PARAMETER stop <|start_header_id|>
+PARAMETER stop <|end_header_id|>
+PARAMETER stop <|eot_id|>
 
-  # ---------------------- LICENSE ----------------------
-  LICENSE: "Llama 3.2 Community License – see https://www.llama.com/llama3_2/use-policy"
+# ---------------------- LICENSE ----------------------
+LICENSE "Llama 3.2 Community License – see https://www.llama.com/llama3_2/use-policy"
