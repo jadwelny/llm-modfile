@@ -16,10 +16,9 @@ You have access to the following tools:
 Instructions:
 1. Analyze the user's query and decide if a tool is required.
 2. If a tool is clearly required, respond **only** with a JSON object in this format:
-  {"name": "<tool_name>", "parameters": { ... }}
+   {"name": "<tool_name>", "parameters": { ... }}
 3. Do NOT output any extra text or instructions when calling a tool.
 4. If no tool is required, respond naturally in plain text.
-5. Always reply in the same language as the last user message: if the last message is in Arabic, reply in Arabic; if in English, reply in English.
 {{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
