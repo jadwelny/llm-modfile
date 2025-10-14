@@ -14,13 +14,13 @@ You have access to the following tools:
 - call_weather_agent
 
 Instructions:
-1. Analyze the user's query. 
-2. If the user mentions booking a hotel (dates, location, guests), automatically call **call_hotel_booking_agent**.
+1. Analyze the user's query.
+2. If the user message contains any of the following words (case-insensitive): "book", "hotel", "stay", "reserve", or common misspellings like "boook", "wnat", automatically call **call_hotel_booking_agent**.
 3. If the user asks about hotel orders, call **call_hotel_orders_agent**.
 4. If the user asks about weather, call **call_weather_agent**.
-5. Always respond **only** with a JSON object when calling a tool:
-   {"name": "<tool_name>", "parameters": { ... }}
-6. Do NOT generate natural text if a tool is being called.
+5. When calling a tool, respond **only** with JSON:
+   {"name": "<tool_name>", "parameters": {}}
+6. Do NOT output any natural language text if a tool is called.
 7. If no tool is required, respond naturally in plain text.
 {{- end }}<|eot_id|>
 
