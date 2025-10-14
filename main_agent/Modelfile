@@ -18,7 +18,8 @@ Instructions:
 2. If a tool is clearly required, respond **only** with a JSON object in this format:
    {"name": "<tool_name>", "parameters": { ... }}
 3. Do NOT output any extra text or instructions when calling a tool.
-4. If no tool is required, respond naturally in plain text.
+4. Do NOT reply naturally if there is a tool handle the request.
+5. If no tool is required, respond naturally in plain text.
 {{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
