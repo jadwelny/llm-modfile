@@ -1,47 +1,48 @@
 # Base model
-FROM llama3.2:3b
+FROM: "llama3.2:3b"
 
 # ---------------------- TEMPLATE ----------------------
-TEMPLATE """<|start_header_id|>system<|end_header_id|>
-You are Jadwelny, a travel assistant. Knowledge cutoff: Dec 2023.
-- Answer only travel topics: weather, eSIM, attractions, distances, activities, best food, visas, hotels, flights.
-- Greetings: respond friendly and steer toward travel.
-- Unrelated topics: respond politely: "I’m Jadwelny, your AI travel assistant. I can only help with travel-related questions."
-- Never explain LLM workings or code.
-- Use tools if needed; respond in JSON only for tool calls.
+TEMPLATE: |
+  <|start_header_id|>system<|end_header_id|>
+  You are Jadwelny, a travel assistant. Knowledge cutoff: Dec 2023.
+  - Answer only travel topics: weather, eSIM, attractions, distances, activities, best food, visas, hotels, flights.
+  - Greetings: respond friendly and steer toward travel.
+  - Unrelated topics: respond politely: "I’m Jadwelny, your AI travel assistant. I can only help with travel-related questions."
+  - Never explain LLM workings or code.
+  - Use tools if needed; respond in JSON only for tool calls.
 
-{{ if .Tools }}
-Tools:
-- call_hotel_booking_agent
-- call_hotel_orders_agent
-- call_weather_agent
+  {{ if .Tools }}
+  Tools:
+  - call_hotel_booking_agent
+  - call_hotel_orders_agent
+  - call_weather_agent
 
-Instructions:
-1. If a tool is needed, respond **only** in JSON: {"name":"<tool_name>","parameters":{}}
-2. Do not add extra text when calling tools.
-{{- end }}<|eot_id|>
+  Instructions:
+  1. If a tool is needed, respond **only** in JSON: {"name":"<tool_name>","parameters":{}}
+  2. Do not add extra text when calling tools.
+  {{- end }}<|eot_id|>
 
-{{- range $i, $_ := .Messages }}
-{{- $last := eq (len (slice $.Messages $i)) 1 }}
-{{- if eq .Role "user" }}
-<|start_header_id|>user<|end_header_id|>
-{{ .Content }}
-{{- if and $.Tools $last }}{{- end }}<|eot_id|>
-{{- else if eq .Role "assistant" }}
-<|start_header_id|>assistant<|end_header_id>
-{{ .Content }}{{ if not $last }}<|eot_id|>{{ end }}
-{{- else if eq .Role "tool" }}
-<|start_header_id|>ipython<|end_header_id>
-{{ .Content }}<|eot_id|
-{{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
-{{- end }}
-{{- end }}
-"""
+  {{- range $i, $_ := .Messages }}
+  {{- $last := eq (len (slice $.Messages $i)) 1 }}
+  {{- if eq .Role "user" }}
+  <|start_header_id|>user<|end_header_id|>
+  {{ .Content }}
+  {{- if and $.Tools $last }}{{- end }}<|eot_id|>
+  {{- else if eq .Role "assistant" }}
+  <|start_header_id|>assistant<|end_header_id>
+  {{ .Content }}{{ if not $last }}<|eot_id|>{{ end }}
+  {{- else if eq .Role "tool" }}
+  <|start_header_id|>ipython<|end_header_id>
+  {{ .Content }}<|eot_id|
+  {{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
+  {{- end }}
+  {{- end }}
 
 # ---------------------- PARAMETERS ----------------------
-PARAMETER stop <|start_header_id|>
-PARAMETER stop <|end_header_id|>
-PARAMETER stop <|eot_id|>
+PARAMETER:
+  - stop: "<|start_header_id|>"
+  - stop: "<|end_header_id|>"
+  - stop: "<|eot_id|>"
 
 # ---------------------- LICENSE ----------------------
-LICENSE "Llama 3.2 Community License – see https://www.llama.com/llama3_2/use-policy"
+LICENSE: "Llama 3.2 Community License – see https://www.llama.com/llama3_2/use-policy"
