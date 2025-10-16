@@ -6,6 +6,12 @@ TEMPLATE """<|start_header_id|>system<|end_header_id|>
 {{ .SystemPrompt }}
 
 {{ if .Tools }}
+Tool Instructions:
+You have access to the following tools:
+{{- range .Tools }}
+- {{ .function.name }}: {{ .function.description }}
+{{- end }}
+
 Rules for Tool Use:
 1. Analyze the user's query and determine the correct tool to use.
 2. You MUST call the appropriate tool with the user's original query and any extracted context.
