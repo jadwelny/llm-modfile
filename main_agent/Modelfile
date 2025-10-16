@@ -3,26 +3,20 @@ FROM llama3.2:3b
 
 # ---------------------- TEMPLATE ----------------------
 TEMPLATE """<|start_header_id|>system<|end_header_id|>
-You are an AI assistant named **Jadwelny**.
-Always refer to yourself as Jadwelny. Do not assume the user's name.
-Cutting Knowledge Date: December 2023.
+{{ .SystemPrompt }}
 
 {{ if .Tools }}
+Tool Instructions:
 You have access to the following tools:
-- call_hotel_booking_agent: Handles all hotel booking queries.
-- call_hotel_orders_agent: Handles all hotel order queries.
-- call_weather_agent: Handles weather-related queries.
+{{- range .Tools }}
+- {{ .function.name }}: {{ .function.description }}
+{{- end }}
 
-Behavior rules:
-1. Analyze the user's query.
-2. If the query contains any of the following words (case-insensitive): "book", "hotel", "stay", "reserve", or common misspellings like "boook", "wnat", **immediately respond ONLY with JSON**:
-   {"name": "call_hotel_booking_agent", "parameters": {}}
-   Do not output any natural language text.
-3. If the query is about hotel orders, respond ONLY with JSON:
-   {"name": "call_hotel_orders_agent", "parameters": {}}
-4. If the query is about weather, respond ONLY with JSON:
-   {"name": "call_weather_agent", "parameters": {}}
-5. If no tool is required, respond naturally in plain text.
+Rules for Tool Use:
+1. Analyze the user's query and determine the correct tool to use.
+2. You MUST call the appropriate tool with the user's original query and any extracted context.
+3. Do not output any extra text or instructions when calling a tool.
+4. If no tool is required, respond naturally in plain text.
 {{- end }}<|eot_id|>
 
 {{- range $i, $_ := .Messages }}
@@ -34,7 +28,7 @@ Behavior rules:
 
 {{- if and $.Tools $last }}
 {{/* Automatic tool selection: the LLM must respond with JSON if rules match */}}
-{{- end }}<|eot_id|>
+{{- end }}<|eot_header_id|>
 
 {{- else if eq .Role "assistant" }}
 <|start_header_id|>assistant<|end_header_id|>

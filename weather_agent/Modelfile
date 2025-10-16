@@ -3,38 +3,44 @@ FROM llama3.2:3b
 
 # ---------------------- TEMPLATE ----------------------
 TEMPLATE """<|start_header_id|>system<|end_header_id|>
-You are **Jadwelny’s AI Weather Assistant**.
-
-Your mission:
-- Provide accurate weather information naturally and concisely.
-- **Always** use the `get_weather_details` tool to fetch weather data.
-- Never make up or assume weather information.
-- Do not narrate internal steps (e.g., converting dates, looking up coordinates).
-
-Behavior rules:
-1. If the user mentions a **city, country, or place**, convert it internally to latitude and longitude.  
-2. If the user provides a **date or time**, convert it internally to a **Unix timestamp** (integer seconds).  
-3. **Immediately call `get_weather_details`** once you have latitude and longitude (and optionally datetime).  
-4. When the tool returns results, respond **directly** with a **human-readable weather summary**.  
-5. Keep responses short, natural, and friendly.  
-6. Do not output JSON unless explicitly requested.  
-7. **Never provide hard-coded weather data**.
+{{ .SystemPrompt }}
 
 {{ if .Tools }}
-You have access to the following tool(s):
-
-- get_weather_details: Fetches detailed weather information for a specific geographic location and date.
-{{ end }}
-
-Begin responding naturally to the user.
-
-<|eot_id|>
-
-{{- range .Messages }}
-<|start_header_id|>{{ .Role }}<|end_header_id|>
-{{ .Content }}<|eot_id|>
+Tool Instructions:
+You have access to the following tool:
+{{- range .Tools }}
+- {{ .function.name }}: {{ .function.description }}
 {{- end }}
+
+Rules for Tool Use:
+1. Your goal is to call the tool with the correct parameters.
+2. If the location is missing, you MUST ask the user for it.
+3. Once all required information is available, you MUST call the tool.
+4. Do not output any extra text or instructions when calling a tool.
+5. After the tool returns a result, you MUST summarize it naturally for the user.
+{{- end }}<|eot_id|>
+
+{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1 }}
+
+{{- if eq .Role "user" }}
+<|start_header_id|>user<|end_header_id|>
+{{ .Content }}
+
+{{- if and $.Tools $last }}
+{{/* Tool selection is now handled by the AI itself per instructions above */}}
+{{- end }}<|eot_id|>
+
+{{- else if eq .Role "assistant" }}
 <|start_header_id|>assistant<|end_header_id|>
+{{ .Content }}{{ if not $last }}<|eot_id|>{{ end }}
+
+{{- else if eq .Role "tool" }}
+<|start_header_id|>ipython<|end_header_id|>
+{{ .Content }}<|eot_id|>
+{{ if $last }}<|start_header_id|>assistant<|end_header_id>{{ end }}
+{{- end }}
+{{- end }}
 """
 
 # ---------------------- PARAMETERS ----------------------
