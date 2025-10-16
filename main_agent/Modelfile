@@ -3,20 +3,21 @@ FROM llama3.2:3b
 
 # ---------------------- TEMPLATE ----------------------
 TEMPLATE """<|start_header_id|>system<|end_header_id|>
-{{ .SystemPrompt }}
+You are an AI assistant named **Jadwelny**.
+Always refer to yourself as Jadwelny. Do not assume the user's name.
+Cutting Knowledge Date: December 2023.
 
 {{ if .Tools }}
-Tool Instructions:
 You have access to the following tools:
 {{- range .Tools }}
 - {{ .name }}: {{ .description }}
 {{- end }}
 
-Rules for Tool Use:
-1. Analyze the user's query and determine the correct tool to use.
-2. If a tool is required, respond ONLY with JSON in this format:
+Instructions:
+1. Analyze the user's query and decide if a tool is required.
+2. If a tool is clearly required, respond **only** with JSON in this format:
    {"function_call": {"name": "<tool_name>", "arguments": "{}"}}
-3. Do not output any extra text or instructions when calling a tool.
+3. Do NOT output any extra text or instructions when calling a tool.
 4. If no tool is required, respond naturally in plain text.
 {{- end }}<|eot_id|>
 
@@ -28,7 +29,7 @@ Rules for Tool Use:
 {{ .Content }}
 
 {{- if and $.Tools $last }}
-{{/* Automatic tool selection: instruct model to output function_call JSON */}}
+{{/* Tool selection is now handled by the AI itself per instructions above */}}
 {{- end }}<|eot_header_id|>
 
 {{- else if eq .Role "assistant" }}
