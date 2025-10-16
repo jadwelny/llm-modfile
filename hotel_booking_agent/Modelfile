@@ -7,9 +7,9 @@ TEMPLATE """<|start_header_id|>system<|end_header_id|>
 
 {{ if .Tools }}
 Tool Instructions:
-You have access to the following tool:
+You have access to the following tool{{ if gt (len .Tools) 1 }}s{{ end }}:
 {{- range .Tools }}
-- {{ .function.name }}: {{ .function.description }}
+- {{ .name }}: {{ .description }}
 {{- end }}
 
 Rules for Tool Use:
